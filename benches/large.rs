@@ -3,7 +3,7 @@ use phf::phf_set;
 
 use rust_bench_test::generate_cases;
 
-static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 1296] = [
+static ARRAY_LARGE_CASES: [&str; 1296] = [
     "afterAll",
     "afterEach",
     "beforeAll",
@@ -1302,7 +1302,7 @@ static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 1296] = [
     "xtest.each",
 ];
 
-static DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set![
+static PHF_LARGE_CASES: phf::Set<&'static str> = phf_set![
     "afterAll",
     "afterEach",
     "beforeAll",
@@ -2602,19 +2602,15 @@ static DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set![
 ];
 
 fn phf(s: &str) -> bool {
-    DISALLOW_NEW_FOR_BUILTINS_2.contains(s)
+    PHF_LARGE_CASES.contains(s)
 }
 
 fn array(s: &str) -> bool {
-    DISALLOW_NEW_FOR_BUILTINS_1.contains(&s)
-}
-
-fn array_binary(s: &str) -> bool {
-    DISALLOW_NEW_FOR_BUILTINS_1.binary_search(&s).is_ok()
+    ARRAY_LARGE_CASES.contains(&s)
 }
 
 fn benchmark(c: &mut Criterion) {
-    let cases = generate_cases(&DISALLOW_NEW_FOR_BUILTINS_1);
+    let cases = generate_cases(&ARRAY_LARGE_CASES);
 
     println!("Benchmark Cases: \n{}\n", cases.join("\n"));
 
@@ -2628,11 +2624,6 @@ fn benchmark(c: &mut Criterion) {
     c.bench_with_input(BenchmarkId::new("array", "bad"), &bad_input, |b, s| {
         b.iter(|| array(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "bad"),
-        &bad_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 
     c.bench_with_input(BenchmarkId::new("phf", "first"), &first_input, |b, s| {
         b.iter(|| phf(s))
@@ -2640,11 +2631,6 @@ fn benchmark(c: &mut Criterion) {
     c.bench_with_input(BenchmarkId::new("array", "first"), &first_input, |b, s| {
         b.iter(|| array(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "first"),
-        &first_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 
     c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle_input, |b, s| {
         b.iter(|| phf(s))
@@ -2654,11 +2640,6 @@ fn benchmark(c: &mut Criterion) {
         &middle_input,
         |b, s| b.iter(|| array(s)),
     );
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "middle"),
-        &middle_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 
     c.bench_with_input(BenchmarkId::new("phf", "last"), &last_input, |b, s| {
         b.iter(|| phf(s))
@@ -2666,11 +2647,6 @@ fn benchmark(c: &mut Criterion) {
     c.bench_with_input(BenchmarkId::new("array", "last"), &last_input, |b, s| {
         b.iter(|| array(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "last"),
-        &last_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 }
 
 criterion_group!(benches, benchmark);

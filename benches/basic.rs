@@ -3,48 +3,60 @@ use phf::phf_set;
 
 use rust_bench_test::generate_cases;
 
-static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 13] = [
-    "abcdefabcdefabcdefabcdefabcdefapply",
-    "abcdefabcdefabcdefabcdefabcdefconstruct",
-    "abcdefabcdefabcdefabcdefabcdefdefineProperty",
-    "abcdefabcdefabcdefabcdefabcdefdeleteProperty",
-    "abcdefabcdefabcdefabcdefabcdefget",
-    "abcdefabcdefabcdefabcdefabcdefgetOwnPropertyDescriptor",
-    "abcdefabcdefabcdefabcdefabcdefgetPrototypeOf",
-    "abcdefabcdefabcdefabcdefabcdefhas",
-    "abcdefabcdefabcdefabcdefabcdefisExtensible",
-    "abcdefabcdefabcdefabcdefabcdefownKeys",
-    "abcdefabcdefabcdefabcdefabcdefpreventExtensions",
-    "abcdefabcdefabcdefabcdefabcdefset",
-    "abcdefabcdefabcdefabcdefabcdefsetPrototypeOf",
+static ARRAY_BASIC_CASES: [&str; 19] = [
+    "assert",
+    "clear",
+    "count",
+    "countReset",
+    "debug",
+    "dir",
+    "dirxml",
+    "error",
+    "group",
+    "groupCollapsed",
+    "groupEnd",
+    "info",
+    "log",
+    "table",
+    "time",
+    "timeEnd",
+    "timeLog",
+    "trace",
+    "warn",
 ];
 
-static DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set! {
-    "abcdefabcdefabcdefabcdefabcdefapply",
-    "abcdefabcdefabcdefabcdefabcdefconstruct",
-    "abcdefabcdefabcdefabcdefabcdefdefineProperty",
-    "abcdefabcdefabcdefabcdefabcdefdeleteProperty",
-    "abcdefabcdefabcdefabcdefabcdefget",
-    "abcdefabcdefabcdefabcdefabcdefgetOwnPropertyDescriptor",
-    "abcdefabcdefabcdefabcdefabcdefgetPrototypeOf",
-    "abcdefabcdefabcdefabcdefabcdefhas",
-    "abcdefabcdefabcdefabcdefabcdefisExtensible",
-    "abcdefabcdefabcdefabcdefabcdefownKeys",
-    "abcdefabcdefabcdefabcdefabcdefpreventExtensions",
-    "abcdefabcdefabcdefabcdefabcdefset",
-    "abcdefabcdefabcdefabcdefabcdefsetPrototypeOf",
+static PHF_BASIC_CASES: phf::Set<&'static str> = phf_set! {
+    "assert",
+    "clear",
+    "count",
+    "countReset",
+    "debug",
+    "dir",
+    "dirxml",
+    "error",
+    "group",
+    "groupCollapsed",
+    "groupEnd",
+    "info",
+    "log",
+    "table",
+    "time",
+    "timeEnd",
+    "timeLog",
+    "trace",
+    "warn",
 };
 
 fn phf(s: &str) -> bool {
-    DISALLOW_NEW_FOR_BUILTINS_2.contains(s)
+    PHF_BASIC_CASES.contains(s)
 }
 
 fn array(s: &str) -> bool {
-    DISALLOW_NEW_FOR_BUILTINS_1.contains(&s)
+    ARRAY_BASIC_CASES.contains(&s)
 }
 
 fn benchmark(c: &mut Criterion) {
-    let cases = generate_cases(&DISALLOW_NEW_FOR_BUILTINS_1);
+    let cases = generate_cases(&ARRAY_BASIC_CASES);
 
     println!("Benchmark Cases: \n{}\n", cases.join("\n"));
 
