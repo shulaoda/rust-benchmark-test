@@ -3,48 +3,36 @@ use phf::phf_set;
 
 use rust_bench_test::generate_cases;
 
-static ARRAY_BASIC_CASES: [&str; 19] = [
-    "assert",
-    "clear",
-    "count",
-    "countReset",
-    "debug",
-    "dir",
-    "dirxml",
-    "error",
-    "group",
-    "groupCollapsed",
-    "groupEnd",
-    "info",
-    "log",
-    "table",
-    "time",
-    "timeEnd",
-    "timeLog",
-    "trace",
-    "warn",
+static ARRAY_BASIC_CASES: [&str; 13] = [
+    "apply",
+    "construct",
+    "defineProperty",
+    "deleteProperty",
+    "get",
+    "getOwnPropertyDescriptor",
+    "getPrototypeOf",
+    "has",
+    "isExtensible",
+    "ownKeys",
+    "preventExtensions",
+    "set",
+    "setPrototypeOf",
 ];
 
 static PHF_BASIC_CASES: phf::Set<&'static str> = phf_set! {
-    "assert",
-    "clear",
-    "count",
-    "countReset",
-    "debug",
-    "dir",
-    "dirxml",
-    "error",
-    "group",
-    "groupCollapsed",
-    "groupEnd",
-    "info",
-    "log",
-    "table",
-    "time",
-    "timeEnd",
-    "timeLog",
-    "trace",
-    "warn",
+    "apply",
+    "construct",
+    "defineProperty",
+    "deleteProperty",
+    "get",
+    "getOwnPropertyDescriptor",
+    "getPrototypeOf",
+    "has",
+    "isExtensible",
+    "ownKeys",
+    "preventExtensions",
+    "set",
+    "setPrototypeOf",
 };
 
 fn phf(s: &str) -> bool {
@@ -60,37 +48,42 @@ fn benchmark(c: &mut Criterion) {
 
     println!("Benchmark Cases: \n{}\n", cases.join("\n"));
 
-    let [bad_input, first_input, middle_input, last_input] = cases;
+    let [most, worst, first, middle, last] = cases;
 
     let mut c = c.benchmark_group("basic");
 
-    c.bench_with_input(BenchmarkId::new("phf", "bad"), &bad_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "most"), &most, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(BenchmarkId::new("array", "bad"), &bad_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("array", "most"), &most, |b, s| {
         b.iter(|| array(s))
     });
 
-    c.bench_with_input(BenchmarkId::new("phf", "first"), &first_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "worst"), &worst, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(BenchmarkId::new("array", "first"), &first_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("array", "worst"), &worst, |b, s| {
         b.iter(|| array(s))
     });
 
-    c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "first"), &first, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array", "middle"),
-        &middle_input,
-        |b, s| b.iter(|| array(s)),
-    );
+    c.bench_with_input(BenchmarkId::new("array", "first"), &first, |b, s| {
+        b.iter(|| array(s))
+    });
 
-    c.bench_with_input(BenchmarkId::new("phf", "last"), &last_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(BenchmarkId::new("array", "last"), &last_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("array", "middle"), &middle, |b, s| {
+        b.iter(|| array(s))
+    });
+
+    c.bench_with_input(BenchmarkId::new("phf", "last"), &last, |b, s| {
+        b.iter(|| phf(s))
+    });
+    c.bench_with_input(BenchmarkId::new("array", "last"), &last, |b, s| {
         b.iter(|| array(s))
     });
 }

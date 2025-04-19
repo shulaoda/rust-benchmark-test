@@ -2614,37 +2614,42 @@ fn benchmark(c: &mut Criterion) {
 
     println!("Benchmark Cases: \n{}\n", cases.join("\n"));
 
-    let [bad_input, first_input, middle_input, last_input] = cases;
+    let [most, worst, first, middle, last] = cases;
 
     let mut c = c.benchmark_group("large");
 
-    c.bench_with_input(BenchmarkId::new("phf", "bad"), &bad_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "most"), &most, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(BenchmarkId::new("array", "bad"), &bad_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("array", "most"), &most, |b, s| {
         b.iter(|| array(s))
     });
 
-    c.bench_with_input(BenchmarkId::new("phf", "first"), &first_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "worst"), &worst, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(BenchmarkId::new("array", "first"), &first_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("array", "worst"), &worst, |b, s| {
         b.iter(|| array(s))
     });
 
-    c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "first"), &first, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array", "middle"),
-        &middle_input,
-        |b, s| b.iter(|| array(s)),
-    );
+    c.bench_with_input(BenchmarkId::new("array", "first"), &first, |b, s| {
+        b.iter(|| array(s))
+    });
 
-    c.bench_with_input(BenchmarkId::new("phf", "last"), &last_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle, |b, s| {
         b.iter(|| phf(s))
     });
-    c.bench_with_input(BenchmarkId::new("array", "last"), &last_input, |b, s| {
+    c.bench_with_input(BenchmarkId::new("array", "middle"), &middle, |b, s| {
+        b.iter(|| array(s))
+    });
+
+    c.bench_with_input(BenchmarkId::new("phf", "last"), &last, |b, s| {
+        b.iter(|| phf(s))
+    });
+    c.bench_with_input(BenchmarkId::new("array", "last"), &last, |b, s| {
         b.iter(|| array(s))
     });
 }

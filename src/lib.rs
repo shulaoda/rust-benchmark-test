@@ -1,18 +1,23 @@
 use std::collections::HashMap;
 
-pub fn generate_cases(arr: &[&str]) -> [String; 4] {
+pub fn generate_cases(arr: &[&str]) -> [String; 5] {
     let mut dataset = HashMap::<usize, Vec<&str>>::new();
 
     for i in arr {
-        if let Some(v) = dataset.get_mut(&i.len()) {
-            v.push(i);
-        } else {
-            dataset.insert(i.len(), vec![i]);
-        }
+        dataset.entry(i.len()).or_default().push(i);
     }
 
     let mut king = 0;
-    let mut end_result = String::new();
+    let mut final_result = String::new();
+
+    let multi_times = dataset
+        .iter()
+        .max_by(|x, y| {
+            let result = x.1.len().cmp(&y.1.len());
+            if result.is_eq() { x.0.cmp(y.0) } else { result }
+        })
+        .map(|(_, i)| i.last().unwrap().to_string())
+        .unwrap_or_default();
 
     for value in &mut dataset.values().clone() {
         let mut strings = value.clone();
@@ -55,20 +60,22 @@ pub fn generate_cases(arr: &[&str]) -> [String; 4] {
 
         if king < count {
             king = count;
-            end_result = result.join("");
+            final_result = result.join("");
         }
     }
 
-    end_result.replace_range(end_result.len() - 1.., "!");
+    final_result.replace_range(final_result.len() - 1.., "!");
     println!(
-        "Generate worst case: {:?} -> len + O({}) -> O({})\n",
-        end_result,
+        "Generate multi-times case: {} \nGenerate worst case: {} -> len + O({}) -> O({})\n",
+        multi_times,
+        final_result,
         king,
         king + arr.len()
     );
 
     [
-        end_result,
+        multi_times,
+        final_result,
         arr[0].to_string(),
         arr[arr.len() / 2].to_string(),
         arr[arr.len() - 1].to_string(),
