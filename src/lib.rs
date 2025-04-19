@@ -53,7 +53,7 @@ pub fn generate_cases(arr: &[&str]) -> [String; 4] {
             result.push(prefix);
         }
 
-        if count > king {
+        if king < count {
             king = count;
             end_result = result.join("");
         }
@@ -73,4 +73,15 @@ pub fn generate_cases(arr: &[&str]) -> [String; 4] {
         arr[arr.len() / 2].to_string(),
         arr[arr.len() - 1].to_string(),
     ]
+}
+
+#[test]
+fn test() {
+    let case1 = ["ab", "abc"];
+    let case2 = ["ab", "abc", "ad", "af"];
+    let case3 = ["a", "ab", "abc", "abcd", "abcde"];
+
+    generate_cases(&case1);
+    generate_cases(&case2);
+    generate_cases(&case3);
 }
