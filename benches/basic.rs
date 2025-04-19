@@ -1,7 +1,9 @@
-use criterion::{Criterion, criterion_group, criterion_main};
+use std::fs;
+
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use phf::phf_set;
 
-const DISALLOW_NEW_FOR_BUILTINS_1: [&str; 25] = [
+static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 25] = [
     "2112e",
     "2dwqqd",
     "5169",
@@ -29,7 +31,7 @@ const DISALLOW_NEW_FOR_BUILTINS_1: [&str; 25] = [
     "meituan",
 ];
 
-const DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set! {
+static DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set! {
     "2112e",
     "2dwqqd",
     "5169",
@@ -57,74 +59,77 @@ const DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set! {
     "meituan",
 };
 
-fn phf_bad() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_2.contains("-Stringa");
+fn phf(s: &str) -> bool {
+    DISALLOW_NEW_FOR_BUILTINS_2.contains(s)
 }
 
-fn phf_first() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_2.contains("2112e");
+fn array(s: &str) -> bool {
+    DISALLOW_NEW_FOR_BUILTINS_1.contains(&s)
 }
 
-fn phf_middle() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_2.contains("String");
-}
-
-fn phf_last() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_2.contains("meituan");
-}
-
-fn array_bad() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1.contains(&"-Stringa");
-}
-
-fn array_first() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1.contains(&"2112e");
-}
-
-fn array_middle() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1.contains(&"String");
-}
-
-fn array_last() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1.contains(&"meituan");
-}
-
-fn array_binary_bad() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1
-        .binary_search(&"-Stringa")
-        .is_ok();
-}
-
-fn array_binary_first() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1.binary_search(&"2112e").is_ok();
-}
-
-fn array_binary_middle() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1.binary_search(&"String").is_ok();
-}
-
-fn array_binary_last() {
-    let _ = DISALLOW_NEW_FOR_BUILTINS_1
-        .binary_search(&"meituan")
-        .is_ok();
+fn array_binary(s: &str) -> bool {
+    DISALLOW_NEW_FOR_BUILTINS_1.binary_search(&s).is_ok()
 }
 
 fn benchmark(c: &mut Criterion) {
-    c.bench_function("phf bad", |b| b.iter(|| phf_bad()));
-    c.bench_function("array bad", |b| b.iter(|| array_bad()));
-    c.bench_function("array binary bad", |b| b.iter(|| array_binary_bad()));
+    let input_data = fs::read_to_string("./benches/inputs_basic.txt").unwrap();
+    let [bad_input, first_input, middle_input, last_input] =
+        input_data.trim().split('\n').collect::<Vec<&str>>()[..]
+    else {
+        panic!("Invalid input data")
+    };
 
-    c.bench_function("phf first", |b| b.iter(|| phf_first()));
-    c.bench_function("array first", |b| b.iter(|| array_first()));
-    c.bench_function("array binary first", |b| b.iter(|| array_binary_first()));
+    let mut c = c.benchmark_group("basic");
 
-    c.bench_function("phf middle", |b| b.iter(|| phf_middle()));
-    c.bench_function("array middle", |b| b.iter(|| array_middle()));
-    c.bench_function("array binary middle", |b| b.iter(|| array_binary_middle()));
+    c.bench_with_input(BenchmarkId::new("phf", "bad"), &bad_input, |b, s| {
+        b.iter(|| phf(s))
+    });
+    c.bench_with_input(BenchmarkId::new("array", "bad"), &bad_input, |b, s| {
+        b.iter(|| array(s))
+    });
+    c.bench_with_input(
+        BenchmarkId::new("array_binary", "bad"),
+        &bad_input,
+        |b, s| b.iter(|| array_binary(s)),
+    );
 
-    c.bench_function("phf last", |b| b.iter(|| phf_last()));
-    c.bench_function("array last", |b| b.iter(|| array_last()));
-    c.bench_function("array binary last", |b| b.iter(|| array_binary_last()));
+    c.bench_with_input(BenchmarkId::new("phf", "first"), &first_input, |b, s| {
+        b.iter(|| phf(s))
+    });
+    c.bench_with_input(BenchmarkId::new("array", "first"), &first_input, |b, s| {
+        b.iter(|| array(s))
+    });
+    c.bench_with_input(
+        BenchmarkId::new("array_binary", "first"),
+        &first_input,
+        |b, s| b.iter(|| array_binary(s)),
+    );
+
+    c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle_input, |b, s| {
+        b.iter(|| phf(s))
+    });
+    c.bench_with_input(
+        BenchmarkId::new("array", "middle"),
+        &middle_input,
+        |b, s| b.iter(|| array(s)),
+    );
+    c.bench_with_input(
+        BenchmarkId::new("array_binary", "middle"),
+        &middle_input,
+        |b, s| b.iter(|| array_binary(s)),
+    );
+
+    c.bench_with_input(BenchmarkId::new("phf", "last"), &last_input, |b, s| {
+        b.iter(|| phf(s))
+    });
+    c.bench_with_input(BenchmarkId::new("array", "last"), &last_input, |b, s| {
+        b.iter(|| array(s))
+    });
+    c.bench_with_input(
+        BenchmarkId::new("array_binary", "last"),
+        &last_input,
+        |b, s| b.iter(|| array_binary(s)),
+    );
 }
 
 criterion_group!(benches, benchmark);
