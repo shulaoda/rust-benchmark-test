@@ -1,62 +1,38 @@
-use std::fs;
-
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use phf::phf_set;
 
-static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 25] = [
-    "2112e",
-    "2dwqqd",
-    "5169",
-    "AABBWW",
-    "BBCCDD",
-    "BigInt",
-    "Boolean",
-    "HHAWD",
-    "Number",
-    "Q51515",
-    "QQ",
-    "QQDD",
-    "String",
-    "Symbol",
-    "__+!@!",
-    "Tencent",
-    "adwad",
-    "alibaba",
-    "awf",
-    "bytedance",
-    "ccaw252",
-    "dawgfaw",
-    "dwqf",
-    "mayi",
-    "meituan",
+use rust_bench_test::generate_cases;
+
+static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 13] = [
+    "abcdefabcdefabcdefabcdefabcdefapply",
+    "abcdefabcdefabcdefabcdefabcdefconstruct",
+    "abcdefabcdefabcdefabcdefabcdefdefineProperty",
+    "abcdefabcdefabcdefabcdefabcdefdeleteProperty",
+    "abcdefabcdefabcdefabcdefabcdefget",
+    "abcdefabcdefabcdefabcdefabcdefgetOwnPropertyDescriptor",
+    "abcdefabcdefabcdefabcdefabcdefgetPrototypeOf",
+    "abcdefabcdefabcdefabcdefabcdefhas",
+    "abcdefabcdefabcdefabcdefabcdefisExtensible",
+    "abcdefabcdefabcdefabcdefabcdefownKeys",
+    "abcdefabcdefabcdefabcdefabcdefpreventExtensions",
+    "abcdefabcdefabcdefabcdefabcdefset",
+    "abcdefabcdefabcdefabcdefabcdefsetPrototypeOf",
 ];
 
 static DISALLOW_NEW_FOR_BUILTINS_2: phf::Set<&'static str> = phf_set! {
-    "2112e",
-    "2dwqqd",
-    "5169",
-    "AABBWW",
-    "BBCCDD",
-    "BigInt",
-    "Boolean",
-    "HHAWD",
-    "Number",
-    "Q51515",
-    "QQ",
-    "QQDD",
-    "String",
-    "Symbol",
-    "__+!@!",
-    "Tencent",
-    "adwad",
-    "alibaba",
-    "awf",
-    "bytedance",
-    "ccaw252",
-    "dawgfaw",
-    "dwqf",
-    "mayi",
-    "meituan",
+    "abcdefabcdefabcdefabcdefabcdefapply",
+    "abcdefabcdefabcdefabcdefabcdefconstruct",
+    "abcdefabcdefabcdefabcdefabcdefdefineProperty",
+    "abcdefabcdefabcdefabcdefabcdefdeleteProperty",
+    "abcdefabcdefabcdefabcdefabcdefget",
+    "abcdefabcdefabcdefabcdefabcdefgetOwnPropertyDescriptor",
+    "abcdefabcdefabcdefabcdefabcdefgetPrototypeOf",
+    "abcdefabcdefabcdefabcdefabcdefhas",
+    "abcdefabcdefabcdefabcdefabcdefisExtensible",
+    "abcdefabcdefabcdefabcdefabcdefownKeys",
+    "abcdefabcdefabcdefabcdefabcdefpreventExtensions",
+    "abcdefabcdefabcdefabcdefabcdefset",
+    "abcdefabcdefabcdefabcdefabcdefsetPrototypeOf",
 };
 
 fn phf(s: &str) -> bool {
@@ -67,17 +43,12 @@ fn array(s: &str) -> bool {
     DISALLOW_NEW_FOR_BUILTINS_1.contains(&s)
 }
 
-fn array_binary(s: &str) -> bool {
-    DISALLOW_NEW_FOR_BUILTINS_1.binary_search(&s).is_ok()
-}
-
 fn benchmark(c: &mut Criterion) {
-    let input_data = fs::read_to_string("./benches/inputs_basic.txt").unwrap();
-    let [bad_input, first_input, middle_input, last_input] =
-        input_data.trim().split('\n').collect::<Vec<&str>>()[..]
-    else {
-        panic!("Invalid input data")
-    };
+    let cases = generate_cases(&DISALLOW_NEW_FOR_BUILTINS_1);
+
+    println!("Benchmark Cases: \n{}\n", cases.join("\n"));
+
+    let [bad_input, first_input, middle_input, last_input] = cases;
 
     let mut c = c.benchmark_group("basic");
 
@@ -87,11 +58,6 @@ fn benchmark(c: &mut Criterion) {
     c.bench_with_input(BenchmarkId::new("array", "bad"), &bad_input, |b, s| {
         b.iter(|| array(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "bad"),
-        &bad_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 
     c.bench_with_input(BenchmarkId::new("phf", "first"), &first_input, |b, s| {
         b.iter(|| phf(s))
@@ -99,11 +65,6 @@ fn benchmark(c: &mut Criterion) {
     c.bench_with_input(BenchmarkId::new("array", "first"), &first_input, |b, s| {
         b.iter(|| array(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "first"),
-        &first_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 
     c.bench_with_input(BenchmarkId::new("phf", "middle"), &middle_input, |b, s| {
         b.iter(|| phf(s))
@@ -113,11 +74,6 @@ fn benchmark(c: &mut Criterion) {
         &middle_input,
         |b, s| b.iter(|| array(s)),
     );
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "middle"),
-        &middle_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 
     c.bench_with_input(BenchmarkId::new("phf", "last"), &last_input, |b, s| {
         b.iter(|| phf(s))
@@ -125,11 +81,6 @@ fn benchmark(c: &mut Criterion) {
     c.bench_with_input(BenchmarkId::new("array", "last"), &last_input, |b, s| {
         b.iter(|| array(s))
     });
-    c.bench_with_input(
-        BenchmarkId::new("array_binary", "last"),
-        &last_input,
-        |b, s| b.iter(|| array_binary(s)),
-    );
 }
 
 criterion_group!(benches, benchmark);

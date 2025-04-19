@@ -1,7 +1,7 @@
-use std::fs;
-
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use phf::phf_set;
+
+use rust_bench_test::generate_cases;
 
 static DISALLOW_NEW_FOR_BUILTINS_1: [&str; 1296] = [
     "afterAll",
@@ -2614,12 +2614,11 @@ fn array_binary(s: &str) -> bool {
 }
 
 fn benchmark(c: &mut Criterion) {
-    let input_data = fs::read_to_string("./benches/inputs_large.txt").unwrap();
-    let [bad_input, first_input, middle_input, last_input] =
-        input_data.trim().split('\n').collect::<Vec<&str>>()[..]
-    else {
-        panic!("Invalid input data")
-    };
+    let cases = generate_cases(&DISALLOW_NEW_FOR_BUILTINS_1);
+
+    println!("Benchmark Cases: \n{}\n", cases.join("\n"));
+
+    let [bad_input, first_input, middle_input, last_input] = cases;
 
     let mut c = c.benchmark_group("large");
 
